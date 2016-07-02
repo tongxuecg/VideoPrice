@@ -2,7 +2,7 @@ import scrapy
 
 
 class VideobaseItem(scrapy.Item):
-    
+    # base infos table
     country = scrapy.Field()
     company = scrapy.Field()
     year = scrapy.Field()
@@ -15,23 +15,23 @@ class VideobaseItem(scrapy.Item):
     region_code = scrapy.Field()
     asin = scrapy.Field()
 
-class Aama_his_datas(scrapy.Item):
-	Abottom_price = scrapy.Field()
-	Abottom_time = scrapy.Field()
+    # Aama_his_datas table
+    Abottom_price = scrapy.Field()
+    Abottom_time = scrapy.Field()
 
-class Bama_his_datas(scrapy.Item):
-	Bbottom_price = scrapy.Field()
-	Bbottom_time = scrapy.Field()
+    # Bama_his_datas table
+    Bbottom_price = scrapy.Field()
+    Bbottom_time = scrapy.Field()
 
-class Aama_real_time_price(scrapy.Item):
-	Areal_time_price = scrapy.Field()
+    #Aama_real_time_price table
+    Areal_time_price = scrapy.Field()
 
-class Bama_real_time_price(scrapy.Item):
-	Breal_time_price = scrapy.Field()
+    #Bama_real_time_price table
+    Breal_time_price = scrapy.Field()
 
-	
+    
 
-	
+    
 
     
 

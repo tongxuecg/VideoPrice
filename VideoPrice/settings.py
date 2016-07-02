@@ -63,6 +63,7 @@ NEWSPIDER_MODULE = 'VideoPrice.spiders'
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
 #    'VideoPrice.pipelines.SomePipeline': 300,
+#'VideoPrice.pipelines.MySQLStorePipeline': 400,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)

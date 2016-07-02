@@ -6,10 +6,11 @@ from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.selector import Selector
 from scrapy.linkextractors.sgml import SgmlLinkExtractor
 from VideoPrice.items import VideobaseItem
+import request
 
 class DpwSpider(CrawlSpider):
     name = "baseinfo"
-    allowed_domains = ["blu-ray.com"]
+    allowed_domains = ["blu-ray.com","amazon.com","camelcamelcamel.com"]
     #start_urls = ["http://www.blu-ray.com/movies/"]
     start_urls = ["http://www.blu-ray.com/movies/The-X-Files-Event-Series-Blu-ray/147436/"]
 
@@ -18,11 +19,11 @@ class DpwSpider(CrawlSpider):
 
     def parse(self, response):
         sel = Selector(response)
-        site = sel.xpath('//div[@itemprop="review"]')
-
         item = VideobaseItem() 
 
-        country=''
+        country=sel.xpath('//table[@width="1262"]//td[@width="518"]/img/@title').extract()
+        item['country']=country
+
         company=sel.xpath('//span[@class="subheading"]/a[1]/text()').extract()
         item['company']=company  
 
@@ -57,9 +58,75 @@ class DpwSpider(CrawlSpider):
         link_tmp=''.join(asin)
         new_link=urllib.urlopen(link_tmp).geturl()
 
-        item['asin']=re.findall(r'(?<=dp\/).+?(?=\?)',new_link)
+        item['asin']=tmp=re.findall(r'(?<=dp\/).+?(?=\?)',new_link)    
+        Asearch_link = "%s%s" % ('http://camelcamelcamel.com/search?sq=',''.join(tmp))
+        Bsearch_link = "%s%s" % ('http://uk.camelcamelcamel.com/search?sq=',''.join(tmp))
+        A_real_price = "https://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%%3Daps&field-keywords=%s&rh=i%%3Aaps%%2Ck%%3AB00YHRMI3O" %  ''.join(tmp)
+        B_real_price = "https://www.amazon.co.uk/s/ref=nb_sb_noss?url=search-alias%%3Daps&field-keywords=%s&rh=i%%3Aaps%%2Ck%%3AB00YHRMI3O"  %  ''.join(tmp)
 
+        
+
+        yield scrapy.Request(url=Asearch_link,meta={'item':item},callback=self.A_pase,dont_filter=True)
+
+        yield scrapy.Request(url=Bsearch_link,meta={'item':item},callback=self.B_pase,dont_filter=True)
+
+        yield scrapy.Request(url=A_real_price,meta={'item':item},callback=self.A_real_price,dont_filter=True)
+   
+        yield scrapy.Request(url=B_real_price,meta={'item':item},callback=self.B_real_price,dont_filter=True)
+        
+
+    def A_real_price(self,response):   
+
+        item = response.meta['item']
+        sel = Selector(response)
+        site=sel.xpath('//ul[@id="s-results-list-atf"]//div[@class="a-row a-spacing-none"]//a[@class="a-link-normal a-text-normal"]')
+
+        
+        item['Areal_time_price']=site.xpath('span/text()').extract()
+        
+        
+        
+
+    def B_real_price(self,response):   
+
+        item = response.meta['item']
+        sel = Selector(response)
+        site=sel.xpath('//div[@id="resultsCol"]//div[@id="a-row a-spacing-none"]')
+
+        
+        item['Breal_time_price']=site.xpath('//span/text()').extract()
+        
         return item
+
+
+    def A_pase(self,response):   
+
+        item = response.meta['item']
+        sel = Selector(response)
+        site=sel.xpath('//div[@id="section_amazon"]//table[@class="product_pane"]//tr[@class="lowest_price"]')
+
+        
+        item['Abottom_price']=site.xpath('td[2]/text()').extract()
+
+        item['Abottom_time']=site.xpath('td[3]/text()').extract()
+
+
+
+
+    def B_pase(self,response):   
+
+
+        item = response.meta['item']
+        sel = Selector(response)
+        
+        site=sel.xpath('//div[@id="section_new"]//table[@class="product_pane"]//tr[@class="lowest_price"]')
+
+        item['Bbottom_price']=site.xpath('td[2]/text()').extract()
+
+        item['Bbottom_time']=site.xpath('td[3]/text()').extract()
+
+        
+
 
 
         
